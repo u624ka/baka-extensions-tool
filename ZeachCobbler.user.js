@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Zeach Cobbler
-// @namespace    https://github.com/RealDebugMonkey/ZeachCobbler
-// @updateURL    http://bit.do/ZeachCobblerJS2
-// @downloadURL  http://bit.do/ZeachCobblerJS2
+// @name         Baka Cobbler
+// @namespace    baka-extensions-tool
+// @updateURL    https://raw.githubusercontent.com/xzfc/BakaCobbler/bakacobbler/ZeachCobbler.user.js
+// @downloadURL  https://raw.githubusercontent.com/xzfc/BakaCobbler/bakacobbler/ZeachCobbler.user.js
 // @contributer  See full list at https://github.com/RealDebugMonkey/ZeachCobbler#contributers-and-used-code
 // @version      0.28.2
 // @description  Agario powerups
@@ -79,6 +79,20 @@
 // @grant        GM_xmlhttpRequest
 
 // ==/UserScript==
+
+unsafeWindow.agar = {};
+function exposeReset() {
+    var dd = 7071.067811865476;
+    unsafeWindow.agar.allCells = {};
+    unsafeWindow.agar.myCells = [];
+    unsafeWindow.agar.top = [];
+    unsafeWindow.agar.ws = "";
+    unsafeWindow.agar.dimensions = [-dd,-dd,dd,dd];
+    unsafeWindow.agar.rawViewport={x:0,y:0,scale:1};
+}
+exposeReset();
+$( "<style>#mini-map { display:none; }</style>" ).appendTo( "head" )
+
 var _version_ = GM_info.script.version;
 
 var debugMonkeyReleaseMessage = "<h3>New UI</h3><p>" +
@@ -1827,6 +1841,7 @@ jQuery("#connecting").after('<canvas id="canvas" width="800" height="600"></canv
         };
         if (/firefox/i.test(navigator.userAgent)) {
             document.addEventListener("DOMMouseScroll", Na, false);
+            unsafeWindow.agar.dommousescroll = Na;
         } else {
             document.body.onmousewheel = Na;
         }
@@ -2122,6 +2137,8 @@ jQuery("#connecting").after('<canvas id="canvas" width="800" height="600"></canv
         ka = false;
         console.log("Connecting to " + a$$0);
         r = new WebSocket(a$$0);
+        exposeReset();
+        unsafeWindow.agar.ws = a$$0;
         r.binaryType = "arraybuffer";
         r.onopen = function() {
             var a;
@@ -2195,6 +2212,9 @@ jQuery("#connecting").after('<canvas id="canvas" width="800" height="600"></canv
                 b += 4;
                 $ = a.getFloat32(b, true);
                 b += 4;
+                unsafeWindow.agar.rawViewport.x = Y;
+                unsafeWindow.agar.rawViewport.y = Z;
+                unsafeWindow.agar.rawViewport.scale = $;
                 break;
             case 20:
                 m = [];
@@ -2215,6 +2235,7 @@ jQuery("#connecting").after('<canvas id="canvas" width="800" height="600"></canv
                 /*new*/onBeforeNewPointPacket();
                 K.push(a.getUint32(b, true));
                 b += 4;
+                unsafeWindow.agar.myCells = K;
                 break;
             case 49:
                 if (null != z) {
@@ -2223,6 +2244,7 @@ jQuery("#connecting").after('<canvas id="canvas" width="800" height="600"></canv
                 var e$$0 = a.getUint32(b, true);
                 b = b + 4;
                 E = [];
+                unsafeWindow.agar.top = E;
                 var l = 0;
                 for (;l < e$$0;++l) {
                     var p = a.getUint32(b, true);
@@ -2254,6 +2276,7 @@ jQuery("#connecting").after('<canvas id="canvas" width="800" height="600"></canv
                 b += 8;
                 ra = a.getFloat64(b, true);
                 b += 8;
+                unsafeWindow.agar.dimensions = [oa, pa, qa, ra];
                 Y = (qa + oa) / 2;
                 Z = (ra + pa) / 2;
                 $ = 1;
@@ -2362,6 +2385,7 @@ jQuery("#connecting").after('<canvas id="canvas" width="800" height="600"></canv
             }
             r = n;
             n = null;
+            unsafeWindow.agar.allCells = D;
             if (D.hasOwnProperty(e)) {
                 n = D[e];
                 n.P();
@@ -2503,6 +2527,7 @@ jQuery("#connecting").after('<canvas id="canvas" width="800" height="600"></canv
             for (;c < m.length;c++) {
                 a += m[c].size;
             }
+            unsafeWindow.agar.rawViewport.scale = Math.pow(Math.min(64 / a, 1), 0.4);
             a = Math.pow(Math.min(64 / a, 1), 0.4) * cb();
             //k = (9 * k + a) / 10;
             /*new*//*remap*/k = (9 * k + a) / zoomFactor;
@@ -2532,6 +2557,8 @@ jQuery("#connecting").after('<canvas id="canvas" width="800" height="600"></canv
             u = (29 * u + Z) / 30;
             k = (9 * k + $ * cb()) / 10;
         }
+        unsafeWindow.agar.rawViewport.x = t;
+        unsafeWindow.agar.rawViewport.y = u;
         lb();
         ya();
         if (!Fa) {
